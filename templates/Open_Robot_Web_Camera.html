@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Robot Web Camera</title>
+    <style>
+        .con{
+           float:left;
+           height:600px;width:600px;
+           margin-right:10px;
+        }
+        body{
+            background-color:whitesmoke;
+        }
+        table{
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1 style="text-align:center;">打开摄像头</h1>
+    </div>
+    <div>
+        <table>
+            <tr>
+                <td><img src="{{url_for('open_robot_web_camera_on')}}" alt="open_robot_web_camera_on" width="100%"/></td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <br/>
+    </div>
+    <div>
+        <form method="post">
+            <table>
+                <tr>
+                    <td>
+                        <input type="submit" name="close button" value="关闭摄像头" style="width: 200px;height: 30px;"/>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</body>
+</html>
