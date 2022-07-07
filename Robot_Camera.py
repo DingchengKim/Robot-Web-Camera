@@ -1,6 +1,18 @@
 import cv2 as cv
 import numpy as np
 
+#去畸变
+def Undistortion(frame, _mtx, _dist):
+    h, w = frame.shape[:2]
+    new_camera_mtx, roi = cv.getOptimalNewCameraMatrix(_mtx, _dist, (w, h), 1, (w, h))
+    dst = cv.undistort(frame, _mtx, _dist, None, new_camera_mtx)
+    
+    x, y, w, h = roi
+    if roi != (0, 0, 0, 0):
+        dst = dst[y:y+h, x:x+w]
+    
+    return dst
+
 class Robot_Camera:
     
     def __init__(self):
@@ -117,5 +129,42 @@ class Robot_Camera:
             
             np.savez('static/npz/calibrateCamera.npz', _mtx, _dist[0:4])
             
-            print("Finshed!")
+            print("Calibration finshed!")
+            
+    #去畸变后开启摄像头
+    def Open_Robot_Web_Camera_Undistortion(self, x):
+        _mtx = []
+        _dist = []
+        
+        try:
+            npzfile = np.load("static/npz/calibrateCamera.npz", allow_pickle=True)
+            _mtx = npzfile["arr_0"]
+            _dist = npzfile["arr_1"]
+        except IOError:
+            print("Lack of relevant configuration, please calibrate first!")
+            return
+        
+        print("dist", _dist[0:4])
+        
+        self._camera = cv.VideoCapture(x)
+        
+        if not self._camera.isOpened():
+            print("cannot open camera!")
+            return
+        else:
+            while True:
+                ret, self._frame = self._camera.read()
+                if not ret:
+                    print("connot read frame!")
+                    return
+                else:
+                    self._frame = Undistortion(self._frame, _mtx, _dist[0:4])
+                    #把获取到的图像格式转换(编码)成流数据，赋值到内存缓存中;
+                    retx, self._buffer = cv.imencode('.jpg', self._frame)
+                    #将缓存里的流数据转成字节流
+                    self._frame = self._buffer.tobytes()
+                    #指定字节流类型image/jpeg
+                    yield  (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + self._frame + b'\r\n')
+        
+    
         
